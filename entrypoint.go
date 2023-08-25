@@ -85,8 +85,19 @@ func build(packageName, destDir string, platform map[string]string, ldflags stri
 		buildOptions = []string{"build", "-buildmode", "exe", "-ldflags", fmt.Sprintf("\"%s\"", ldflags), "-o", buildFilePath, packagePath}
 	}
 
+	var buildCmd *exec.Cmd
+
+	// generate `go mod` command
+	buildCmd = exec.Command("go", "mod", "tidy")
+	if output, err := buildCmd.Output(); err != nil {
+		fmt.Println("An error occurred during build:", err)
+		os.Exit(1)
+	} else {
+		fmt.Printf("%s\n", output)
+	}
+
 	// generate `go build` command
-	buildCmd := exec.Command("go", buildOptions...)
+	buildCmd = exec.Command("go", buildOptions...)
 
 	// set environment variables
 	buildCmd.Env = append(os.Environ(), []string{
